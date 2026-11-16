@@ -1,0 +1,26 @@
+#密钥与本地环境
+.env
+.env.*
+!.example
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.venv/
+*.log
+
+# Node
+node_modules/
+blog/docs/.vitepress/cache/
+# VitePress 构建产物（不提交）
+blog/docs/.vitepress/dist/
+
+#数据与检索产物
+data/
+chroma_db/
+*.db
+.DS_Store
+# IDE
+.idea/
+.vscode/

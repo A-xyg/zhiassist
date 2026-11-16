@@ -1,0 +1,22 @@
+# 配图统一放在本目录，使用 webp 格式；md 中以 /images/xxx.webp 引用。
+---
+layout:home
+hero:
+    name:知答 ZhiAssist
+    text:从零上线的行业知识库客服Agent
+    tagline:15章实战·可复现·可评测·可写进简历
+    actions：
+    -theme:brand
+     text: 开始读第一章
+     link：/chapters/ch01-enviroment
+    -theme:alt
+    text:查看项目展示
+    link:/projects/
+features:
+  -title:一条主线
+   details:前十三章每章给同一个产品加一块能力，第14章整合上线
+   title:量化证据
+   details:召回命中率、任务完成率、P95延迟、单次成本、全部自己跑出来。
+  -title:工程规范
+   details:锁版本、.env.example、评测集、Trace、上线检查清单。
+---

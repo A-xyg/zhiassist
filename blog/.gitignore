@@ -1,0 +1,8 @@
+# 依赖与构建产物：都不入库，CI 每次现场安装、现场构建
+node_modules/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+
+# 本地草稿与日志
+*.log
+*.local.md
