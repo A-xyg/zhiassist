@@ -1,65 +1,63 @@
-name: Deploy Blog
+# 工作流名称，显示在 GitHub Actions 页
+name: Deploy blog
 
+# 触发条件：只有 main 分支上 blog/ 或本文件变动才构建；也允许手动点击重跑
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
-      - blog/**
-      - .github/workflows/deploy-blog.yml
+      - 'blog/**'
+      - '.github/workflows/deploy-blog.yml'
   workflow_dispatch:
 
+# 最小权限：读代码 + 写 Pages + OIDC token，缺 pages:write 会 403
 permissions:
   contents: read
   pages: write
   id-token: write
 
+# 同一时间只跑一个 Pages 部署；false 表示排队而不是取消前一个
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: blog
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      # 拉取仓库代码；@v7 为 2026-11-15 核对的大版本 tag
+      - uses: actions/checkout@v7
+      # 安装 pnpm；版本必须与 blog/package.json 的 packageManager 一致
+      - uses: pnpm/action-setup@v6
         with:
           version: 12.21.0
-
+      # 装 Node 22 并按 blog/pnpm-lock.yaml 缓存依赖
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: pnpm
+          cache-dependency-path: blog/pnpm-lock.yaml
+      # frozen-lockfile：锁文件说了算，CI 不偷偷升级依赖
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build
-        run: pnpm docs:build
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        run: corepack pnpm install --frozen-lockfile
+        working-directory: blog
+      # 构建：产出 dist/，同时生成 sitemap.xml 与 404.html
+      - name: Build site
+        run: corepack pnpm docs:build
+        working-directory: blog
+      # 准备 Pages 环境（自定义域名时会读取 dist/CNAME）
+      - uses: actions/configure-pages@v6
+      # 把 dist/ 上传为工件，交给 deploy job
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: blog/docs/.vitepress/dist
 
   deploy:
-    needs: build
+    needs: build                   # 必须等 build 成功
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - id: deployment
+        uses: actions/deploy-pages@v5
