@@ -1,0 +1,17 @@
+#一条命令起 MySQL + Redis,第13章容器化复用
+services:
+  mysql:
+    image:mysql:8.0    #固定版本,不用latest
+    environment:
+      MYSQL_ROOT_PASSWORD:devpass #仅本地开发,真实环境走.env不写死
+      MYSQL_DATABASE:zhiassist
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql  #数据卷:容器重建不丢数据
+  redis:
+    image:redis:7-alpine
+    ports:
+      -"6379:6379"
+volumes:
+    mysql_data:
